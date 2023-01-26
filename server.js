@@ -41,6 +41,20 @@ sequelizeConnection.sync().then(()=>{
 });
 
 
+app.get('/',async(req,res)=>{
+    try{
+        const user=await emp.findAll({});
+        console.log("Printing all the data...");
+        res.send(user);
+    }
+    catch(error){
+        res.send(error);
+        console.log("ERROR! "+error);
+    }
+
+});
+
+/*
 
 
 app.get('/',(req,res)=>{
@@ -56,21 +70,18 @@ app.get('/',(req,res)=>{
 
 
 
+*/
 
 
+app.post('/',async(req, res)=>{ 
 
-app.post('/',(req, res)=>{ 
-
-  
-
+    try{        
       const {error}= validateCourse(req.body);
 
     if(error){
         return res.status(400).send(error.details[0].message);
     
     };
-
-
     const empdata = {
         eid: req.body.eid,
         ename: req.body.ename,
@@ -78,21 +89,22 @@ app.post('/',(req, res)=>{
         DOB:req.body.DOB
       };
     
-      emp.create(empdata).then(data=>{
+      const user=await emp.create(empdata);
         console.log("Inserting the data...");
-        res.send(data);
-    }).catch((error)=>{
+        res.send(user);
+    }catch(error){
         res.status(400).send(error.message);
         console.log("ERROR! "+error);
-    });
+    };
 });
 
 
 
 
 
-app.put('/:eid',(req, res)=>{
-const eid = req.params.eid;
+app.put('/:eid',async(req, res)=>{
+    try{
+    const eid = req.params.eid;
 
 const {error}= validateCourse(req.body);
 
@@ -100,14 +112,12 @@ const {error}= validateCourse(req.body);
        return res.status(400).send(error.details[0].message);r
     };
 
-emp.update(req.body, {
-    where:{eid:eid}
-}).then(()=> {
+    await emp.update(req.body, {where:{eid:eid}});
     res.send("Data is updated");
-  }).catch(error=> {
+  }catch(error){
     res.send(error);
-  console.log("ERROR!   "+error);
-  });
+    console.log("ERROR!   "+error);
+  };
 
 
 });
@@ -115,19 +125,19 @@ emp.update(req.body, {
 
 
 
-app.delete('/:eid',(req, res)=>{
+app.delete('/:eid',async(req, res)=>{
 
-    const eid = req.params.eid;
+    try{
+
+        const eid = req.params.eid;
   
-    emp.destroy({
-      where: { eid: eid }
-    })
-      .then(()=> {
-          res.send({message: "Data was deleted successfully!"});
+        await emp.destroy({where: { eid: eid }});
+        res.send({message: "Data was deleted successfully!"});
       
-      }).catch(error => {
+      }
+    catch(error) {
         res.status(500).send({message: "Could not delete Tutorial with id=" + id});
-      });
+      };
 });
 //Function for error checking
 function validateCourse(empdata){
@@ -141,4 +151,3 @@ function validateCourse(empdata){
     return Joi.validate(empdata,schema);
 
 }
-
